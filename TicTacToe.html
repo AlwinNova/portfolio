@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Techwin-games</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color:skyblue;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      line-height: 100px;
+      border: 2px solid #6c757d;
+      cursor: pointer;
+      background-color: lavender;
+    }
+    .cell:hover {
+      background-color:sky;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container text-center mt-5">
+  <h1 class="mb-4">Alwin's Tic Tac Toe</h1>
+  <div id="status" class="alert alert-info">Your Turn (X)</div>
+  <div class="board" id="board">
+    <!-- Cells will be generated here -->
+  </div>
+  <button class="btn btn-primary mt-4" onclick="resetGame()">Reset Game</button>
+</div>
+
+<script>
+  const board = document.getElementById("board");
+  const statusText = document.getElementById("status");
+  let cells = Array(9).fill("");
+  let currentPlayer = "X"; // Human
+  let gameActive = true;
+
+  function createBoard() {
+    board.innerHTML = "";
+    cells.forEach((cell, index) => {
+      const cellDiv = document.createElement("div");
+      cellDiv.className = "cell";
+      cellDiv.dataset.index = index;
+      cellDiv.addEventListener("click", handleClick);
+      cellDiv.textContent = cell;
+      board.appendChild(cellDiv);
+    });
+  }
+
+  function handleClick(e) {
+    const index = e.target.dataset.index;
+    if (cells[index] !== "" || !gameActive || currentPlayer !== "X") return;
+
+    cells[index] = "X";
+    updateBoard();
+    
+    if (checkWinner("X")) {
+      statusText.className = "alert alert-success";
+      statusText.textContent = "You Win!";
+      gameActive = false;
+      return;
+    }
+
+    if (!cells.includes("")) {
+      statusText.className = "alert alert-warning";
+      statusText.textContent = "It's a Draw!";
+      gameActive = false;
+      return;
+    }
+
+    currentPlayer = "O";
+    statusText.className = "alert alert-secondary";
+    statusText.textContent = "Computer's Turn...";
+    
+    setTimeout(() => {
+      computerMove();
+    }, 500); // slight delay for realism
+  }
+
+  function computerMove() {
+    if (!gameActive) return;
+
+    const emptyIndices = cells
+      .map((val, idx) => (val === "" ? idx : null))
+      .filter(val => val !== null);
+
+    const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+    cells[randomIndex] = "O";
+    updateBoard();
+
+    if (checkWinner("O")) {
+      statusText.className = "alert alert-danger";
+      statusText.textContent = "Computer Wins!";
+      gameActive = false;
+      return;
+    }
+
+    if (!cells.includes("")) {
+      statusText.className = "alert alert-warning";
+      statusText.textContent = "It's a Draw!";
+      gameActive = false;
+      return;
+    }
+
+    currentPlayer = "X";
+    statusText.className = "alert alert-info";
+    statusText.textContent = "Your Turn (X)";
+  }
+
+  function updateBoard() {
+    document.querySelectorAll(".cell").forEach((cell, index) => {
+      cell.textContent = cells[index];
+    });
+  }
+
+  function checkWinner(player) {
+    const winPatterns = [
+      [0,1,2], [3,4,5], [6,7,8],
+      [0,3,6], [1,4,7], [2,5,8],
+      [0,4,8], [2,4,6]
+    ];
+    return winPatterns.some(pattern =>
+      pattern.every(index => cells[index] === player)
+    );
+  }
+
+  function resetGame() {
+    cells = Array(9).fill("");
+    currentPlayer = "X";
+    gameActive = true;
+    statusText.className = "alert alert-info";
+    statusText.textContent = "Your Turn (X)";
+    createBoard();
+  }
+
+  createBoard();
+</script>
+
+</body>
+</html>
